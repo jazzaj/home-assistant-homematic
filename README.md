@@ -5,7 +5,7 @@ WARNING: Currently experimental.
 
 Installation:
 1. Make sure pyhomematic (https://github.com/danielperna84/pyhomematic) is installed
-2. Copy files into matching home-assistant folder
+2. Copy files into homeassistant\components and subfolders. Do not place them in .homeassistant/custom_components/
 
 Currently only following HA device types are supported:
 - Light
