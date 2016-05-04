@@ -28,14 +28,14 @@ SENSOR_TYPES = {
 }
 
 def setup_platform(hass, config, add_callback_devices, discovery_info=None):
-    return homematic.setup_pyhomematic_entity_helper(HMBinarySensor, config, add_callback_devices)
+    return homematic.setup_hmdevice_entity_helper(HMBinarySensor, config, add_callback_devices)
 
 
 class HMBinarySensor(homematic.HMDevice, BinarySensorDevice):
     """Represents diverse binary Homematic units in Home Assistant."""
     def __init__(self, config):
         super().__init__(config)
-        self._sensor_class = 'opening'
+        self._sensor_class = None
     
     @property
     def is_on(self):
@@ -60,11 +60,11 @@ class HMBinarySensor(homematic.HMDevice, BinarySensorDevice):
     def connect_to_homematic(self):
         """Configuration specific to device after connection with pyhomematic is established"""
         super().connect_to_homematic()
-        if type(self._pyhomematic).__name__ == "HMDoorContact":
+        if type(self._hmdevice).__name__ == "HMDoorContact":
             self._sensor_class = 'opening'
             if self._is_available:
-                self._state = self._pyhomematic.state
-        if type(self._pyhomematic).__name__ == "HMRemote":
+                self._state = self._hmdevice.state
+        if type(self._hmdevice).__name__ == "HMRemote":
             self._sensor_class = 'remote button'
             self._channel = self._config.get('channel', None)
             if not self._channel:
