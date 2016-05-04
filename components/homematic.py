@@ -22,10 +22,11 @@ import homeassistant.bootstrap
 # from homeassistant.helpers.entity import ToggleEntity
 from collections import OrderedDict
 # import time
-import pyhomematic
-
     
-# REQUIREMENTS = ['pyhomematic']
+#REQUIREMENTS = ['pyhomematic']
+#DEPENDENCIES = ['pyhomematic']
+
+import pyhomematic
 homematic_devices = {}
 HOMEMATIC = pyhomematic
 
@@ -79,7 +80,7 @@ def setup(hass, config):
     # Only required because there is no access on created entities and I lack the knowledge on 
     # a better way how to make the devices variable accessible in all homematic components
 
-    def system_callback_handle(src, *args):
+    def system_callback_handler(src, *args):
         
         print(src, args)
         if src == 'newDevices':
@@ -90,7 +91,7 @@ def setup(hass, config):
                 key_dict[dev['ADDRESS'].split(':')[0]] = True
             # Connect devices already created in HA to pyhomematic and add remaining devices to list
             devices_not_created = []
-            for dev in list(key_dict.keys()):
+            for dev in key_dict: # for dev in list(key_dict.keys()):
                 if dev in homematic_devices:
                     homematic_devices[dev].connect_to_homematic()
                 else:
@@ -127,7 +128,7 @@ def setup(hass, config):
                         homematic_devices[dev].connect_to_homematic()
     
     # Create server thread
-    HOMEMATIC.create_server(local=local_ip, localport=local_port, remote=remote_ip, remoteport=remote_port, systemcallback=system_callback_handle) 
+    HOMEMATIC.create_server(local=local_ip, localport=local_port, remote=remote_ip, remoteport=remote_port, systemcallback=system_callback_handler) 
     HOMEMATIC.start() # Start server thread, connect to homegear, initialize to receive events
     # while not pyhomematic.devices or pyhomematic._server.working:
     #     time.sleep(1)
@@ -176,7 +177,7 @@ def get_devices(device_types, keys):
             device_arr.append(ordered_device_dict)
     return device_arr
 
-def setup_pyhomematic_entity_helper(HMDeviceType, config, add_callback_devices):
+def setup_hmdevice_entity_helper(HMDeviceType, config, add_callback_devices):
     global devices
     
     if pyhomematic.Server is None:
@@ -193,15 +194,15 @@ def setup_pyhomematic_entity_helper(HMDeviceType, config, add_callback_devices):
 
 class HMDevice():
     def __init__(self, config):
-        """Initialize an Homematic Light."""
+        """Initialize generic HM device."""
         self._config = config
         self._address = config.get('address', None)
         self._name = config.get('name', None)
         if not self._name:
             self._name = self._address
         self._state = None
-        self._pyhomematic = None
-        # TODO: Check if _is_connected can be replaced by the usage of _pyhomematic
+        self._hmdevice = None
+        # TODO: Check if _is_connected can be replaced by the usage of _hmdevice
         self._is_connected = False        
         self._is_available = False
     
@@ -225,11 +226,12 @@ class HMDevice():
             else:
                 return
             self.update_ha_state()
-            
-        self._pyhomematic = HOMEMATIC.devices[self._address]
-        self._pyhomematic.setEventCallback(event_received)    
-        self._is_connected = True
-        self._is_available = not self._pyhomematic.UNREACH
+        
+        if self._address in HOMEMATIC.devices:
+            self._hmdevice = HOMEMATIC.devices[self._address]
+            self._hmdevice.setEventCallback(event_received)    
+            self._is_connected = True
+            self._is_available = not self._hmdevice.UNREACH
 
     @property
     def should_poll(self):
