@@ -22,7 +22,7 @@ _LOGGER = logging.getLogger(__name__)
 DEPENDENCIES = ['homematic']
 
 def setup_platform(hass, config, add_callback_devices, discovery_info=None):
-    return homematic.setup_pyhomematic_entity_helper(HMLight, config, add_callback_devices)
+    return homematic.setup_hmdevice_entity_helper(HMLight, config, add_callback_devices)
 
 class HMLight(homematic.HMDevice, Light):
     """Represents an Homematic Light in Home Assistant."""
@@ -51,28 +51,28 @@ class HMLight(homematic.HMDevice, Light):
         if self._is_connected:
             if ATTR_BRIGHTNESS in kwargs and self._dimmer:
                 percent_bright = float(kwargs[ATTR_BRIGHTNESS]) / 255
-                self._pyhomematic.level = percent_bright
+                self._hmdevice.level = percent_bright
             else:
                 self._state = True
-                self._pyhomematic.on()
+                self._hmdevice.on()
 
     def turn_off(self, **kwargs):
         """Turn the light off."""
         if self._is_connected:
             if not self._dimmer:
                 self._state = False
-            self._pyhomematic.off()
+            self._hmdevice.off()
             
     def connect_to_homematic(self):
         """Configuration specific to device after connection with pyhomematic is established"""
         super().connect_to_homematic()
-        if hasattr(self._pyhomematic, 'level'):
+        if hasattr(self._hmdevice, 'level'):
             self._dimmer = True 
         else:
             self._dimmer = False 
         if self._is_available:
             if self._dimmer:
-                self._level = self._pyhomematic.level
+                self._level = self._hmdevice.level
             else:
-                self._state = self._pyhomematic.is_on
+                self._state = self._hmdevice.is_on
             self.update_ha_state()
