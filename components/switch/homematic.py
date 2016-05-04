@@ -21,7 +21,7 @@ _LOGGER = logging.getLogger(__name__)
 DEPENDENCIES = ['homematic']
 
 def setup_platform(hass, config, add_callback_devices, discovery_info=None):
-    return homematic.setup_pyhomematic_entity_helper(HMSwitch, config, add_callback_devices)
+    return homematic.setup_hmdevice_entity_helper(HMSwitch, config, add_callback_devices)
 
 
 class HMSwitch(homematic.HMDevice, SwitchDevice):
@@ -40,25 +40,25 @@ class HMSwitch(homematic.HMDevice, SwitchDevice):
     def turn_on(self, **kwargs):
         """Turn the switch on."""
         if self._is_connected:
-            self._pyhomematic.on()
+            self._hmdevice.on()
             self._state = True
 
     def turn_off(self, **kwargs):
         """Turn the switch off."""
         if self._is_connected:
-            self._pyhomematic.off()
+            self._hmdevice.off()
             self._state = False
 
     def connect_to_homematic(self):
         """Configuration specific to device after connection with pyhomematic is established"""
         super().connect_to_homematic()
-        if hasattr(self._pyhomematic, 'level'):
+        if hasattr(self._hmdevice, 'level'):
             self._dimmer = True 
         else:
             self._dimmer = False 
         if self._is_available:
             if self._dimmer:
-                self._level = self._pyhomematic.level
+                self._level = self._hmdevice.level
             else:
-                self._state = self._pyhomematic.is_on
+                self._state = self._hmdevice.is_on
             self.update_ha_state()
