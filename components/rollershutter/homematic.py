@@ -20,7 +20,7 @@ _LOGGER = logging.getLogger(__name__)
 DEPENDENCIES = ['homematic']
 
 def setup_platform(hass, config, add_callback_devices, discovery_info=None):
-    return homematic.setup_pyhomematic_entity_helper(HMRollershutter, config, add_callback_devices)
+    return homematic.setup_hmdevice_entity_helper(HMRollershutter, config, add_callback_devices)
 
 
 class HMRollershutter(homematic.HMDevice, RollershutterDevice):
@@ -37,23 +37,23 @@ class HMRollershutter(homematic.HMDevice, RollershutterDevice):
     def move_up(self, **kwargs):
         """Move the roller shutter up."""
         if self._is_connected:
-            self._pyhomematic.move_up()
+            self._hmdevice.move_up()
 
     def move_down(self, **kwargs):
         """Move the roller shutter down."""
         if self._is_connected:
-            self._pyhomematic.move_down()
+            self._hmdevice.move_down()
 
     def stop(self, **kwargs):
         """Stop the device."""
         if self._is_connected:
-            self._pyhomematic.stop()
+            self._hmdevice.stop()
 
     def connect_to_homematic(self):
         """Configuration specific to device after connection with pyhomematic is established"""
         super().connect_to_homematic()
         if self._is_available:
-            self._level = self._pyhomematic.level
+            self._level = self._hmdevice.level
             self.update_ha_state()
     
     # TODO: For testing purposes only. To be deleted...
