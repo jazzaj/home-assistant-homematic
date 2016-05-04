@@ -33,6 +33,13 @@ class HMRollershutter(homematic.HMDevice, RollershutterDevice):
         """
         if self._is_connected:
             return int((1 - self._level) * 100)
+        
+    def set_position(self, position):
+        """Move the roller shutter to a defined position between 0 (closed) and 100 (fully open)"""
+        if self._is_connected:
+            position = min(100, max(0, position))
+            self._hmdevice.level = (100 - position) / 100.0
+       
     
     def move_up(self, **kwargs):
         """Move the roller shutter up."""
