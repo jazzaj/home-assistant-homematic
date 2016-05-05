@@ -51,12 +51,32 @@ class HMSwitch(homematic.HMDevice, SwitchDevice):
 
     def connect_to_homematic(self):
         """Configuration specific to device after connection with pyhomematic is established"""
+        def event_received(device, caller, attribute, value):
+            attribute = str(attribute).upper()
+            if attribute == 'LEVEL':
+                self._level = float(value)
+            elif attribute == 'STATE':
+                self._state = bool(value)
+            elif attribute == 'PRESS_LONG_RELEASE':
+                if int(device.split(':')[1]) == int(self._channel):
+                    self._state = False
+            elif attribute == 'PRESS_SHORT' or attribute == 'PRESS_LONG':
+                if int(device.split(':')[1]) == int(self._channel):
+                    self._state = True
+            elif attribute == 'UNREACH':
+                self._is_available = not bool(value)
+            else:
+                return
+            self.update_ha_state()
+
         super().connect_to_homematic()
+
         if hasattr(self._hmdevice, 'level'):
             self._dimmer = True 
         else:
             self._dimmer = False 
         if self._is_available:
+            self._hmdevice.setEventCallback(event_received)
             if self._dimmer:
                 self._level = self._hmdevice.level
             else:
