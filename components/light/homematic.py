@@ -71,12 +71,6 @@ class HMLight(homematic.HMDevice, Light):
                 self._level = float(value)
             elif attribute == 'STATE':
                 self._state = bool(value)
-            elif attribute == 'PRESS_LONG_RELEASE':
-                if int(device.split(':')[1]) == int(self._channel):
-                    self._state = False
-            elif attribute == 'PRESS_SHORT' or attribute == 'PRESS_LONG':
-                if int(device.split(':')[1]) == int(self._channel):
-                    self._state = True
             elif attribute == 'UNREACH':
                 self._is_available = not bool(value)
             else:
