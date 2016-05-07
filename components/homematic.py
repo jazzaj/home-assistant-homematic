@@ -46,6 +46,7 @@ DISCOVER_LIGHTS = "homematic.light"
 DISCOVER_SENSORS = "homematic.sensor"
 DISCOVER_BINARY_SENSORS = "homematic.binary_sensor"
 DISCOVER_ROLLERSHUTTER = "homematic.rollershutter"
+DISCOVER_THERMOSTATS = "homematic.thermostat"
 
 ATTR_DISCOVER_DEVICES = "devices"
 ATTR_DISCOVER_CONFIG = "config"
@@ -53,7 +54,8 @@ ATTR_DISCOVER_CONFIG = "config"
 HM_DEVICE_TYPES = {
    DISCOVER_SWITCHES : ['HMSwitch'],
    DISCOVER_LIGHTS: ['HMDimmer'],
-   DISCOVER_SENSORS : ['HMCcu', 'HMThermostat'],
+   DISCOVER_SENSORS : ['HMCcu'],
+   DISCOVER_THERMOSTATS : ['HMThermostat'],
    DISCOVER_BINARY_SENSORS : ['HMRemote', 'HMDoorContact'],
    DISCOVER_ROLLERSHUTTER : ['HMRollerShutter']
 }
@@ -104,7 +106,8 @@ def setup(hass, config):
                     ('light', get_lights, DISCOVER_LIGHTS),
                     ('rollershutter', get_rollershutters, DISCOVER_ROLLERSHUTTER),
                     ('binary_sensor', get_binary_sensors, DISCOVER_BINARY_SENSORS),
-                    ('sensor', get_sensors, DISCOVER_SENSORS)
+                    ('sensor', get_sensors, DISCOVER_SENSORS),
+                    ('thermostat', get_thermostats, DISCOVER_THERMOSTATS),
                     ):
                     # Get alle devices of a specific type
                     found_devices = func_get_devices(devices_not_created)
@@ -162,6 +165,10 @@ def get_sensors(keys = None):
     return get_devices(HM_DEVICE_TYPES[DISCOVER_SENSORS], keys)
 
 
+def get_thermostats(keys = None):
+    return get_devices(HM_DEVICE_TYPES[DISCOVER_THERMOSTATS], keys)
+
+
 def get_devices(device_types, keys):
     global HOMEMATIC
     
@@ -209,27 +216,8 @@ class HMDevice():
     def connect_to_homematic(self):
         global HOMEMATIC
         
-        def event_received(device, caller, attribute, value):
-            attribute = str(attribute).upper()
-            if attribute == 'LEVEL':
-                self._level = float(value)
-            elif attribute == 'STATE':
-                self._state = bool(value)
-            elif attribute == 'UNREACH':
-                self._is_available = not bool(value)
-            elif attribute == 'PRESS_LONG_RELEASE':
-                if int(device.split(':')[1]) == int(self._channel):
-                    self._state = 0
-            elif attribute == 'PRESS_SHORT' or attribute == 'PRESS_LONG':
-                if int(device.split(':')[1]) == int(self._channel):
-                    self._state = 1
-            else:
-                return
-            self.update_ha_state()
-        
         if self._address in HOMEMATIC.devices:
             self._hmdevice = HOMEMATIC.devices[self._address]
-            self._hmdevice.setEventCallback(event_received)    
             self._is_connected = True
             self._is_available = not self._hmdevice.UNREACH
 
@@ -240,7 +228,7 @@ class HMDevice():
     
     @property
     def name(self):
-        """Return the name of the light."""
+        """Return the name of the device."""
         return self._name
 
     @property

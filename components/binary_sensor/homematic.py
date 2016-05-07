@@ -36,6 +36,7 @@ class HMBinarySensor(homematic.HMDevice, BinarySensorDevice):
     def __init__(self, config):
         super().__init__(config)
         self._sensor_class = None
+        self._battery = None
     
     @property
     def is_on(self):
@@ -59,7 +60,23 @@ class HMBinarySensor(homematic.HMDevice, BinarySensorDevice):
 
     def connect_to_homematic(self):
         """Configuration specific to device after connection with pyhomematic is established"""
+        def event_received(device, caller, attribute, value):
+            attribute = str(attribute).upper()
+            if attribute == 'STATE':
+                self._state = bool(value)
+            elif attribute == 'LOWBAT':
+                if value:
+                    self._battery = 1.5
+                else:
+                    self._battery = 4.6
+            elif attribute == 'UNREACH':
+                self._is_available = not bool(value)
+            else:
+                return
+            self.update_ha_state()
+
         super().connect_to_homematic()
+
         if type(self._hmdevice).__name__ == "HMDoorContact":
             self._sensor_class = 'opening'
             if self._is_available:
@@ -71,4 +88,5 @@ class HMBinarySensor(homematic.HMDevice, BinarySensorDevice):
                 _LOGGER.error("No channel defined for '%s'" %self._address)
                 self._is_available = False
         if self._is_available:
+            self._hmdevice.setEventCallback(event_received)
             self.update_ha_state()

@@ -58,8 +58,19 @@ class HMRollershutter(homematic.HMDevice, RollershutterDevice):
 
     def connect_to_homematic(self):
         """Configuration specific to device after connection with pyhomematic is established"""
+        def event_received(device, caller, attribute, value):
+            attribute = str(attribute).upper()
+            if attribute == 'LEVEL':
+                self._level = float(value)
+            elif attribute == 'UNREACH':
+                self._is_available = not bool(value)
+            else:
+                return
+            self.update_ha_state()
+
         super().connect_to_homematic()
         if self._is_available:
+            self._hmdevice.setEventCallback(event_received)
             self._level = self._hmdevice.level
             self.update_ha_state()
     
