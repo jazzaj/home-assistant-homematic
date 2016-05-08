@@ -112,7 +112,7 @@ class HMThermostat(homematic.HMDevice, ThermostatDevice):
                 self._set_temperature = value
             elif attribute == 'ACTUAL_TEMPERATURE':
                 self._current_temperature = value
-            elif attribute == 'VALVE':
+            elif attribute == 'VALVE_STATE':
                 self._valve = float(value)
             elif attribute == 'CONTROL_MODE':
                 self._mode = value
