@@ -12,6 +12,7 @@ switch:
 
 """
 
+from homeassistant.const import (STATE_CLOSED, STATE_OPEN, STATE_OFF, STATE_ON, STATE_UNKNOWN)
 from homeassistant.components.binary_sensor import BinarySensorDevice
 import homeassistant.components.homematic as homematic
 
@@ -36,7 +37,9 @@ class HMBinarySensor(homematic.HMDevice, BinarySensorDevice):
     def __init__(self, config):
         super().__init__(config)
         self._sensor_class = None
-        self._battery = None
+        self._battery = STATE_UNKNOWN
+        self._rssi = STATE_UNKNOWN
+        self._sabotage = STATE_UNKNOWN
     
     @property
     def is_on(self):
@@ -49,14 +52,15 @@ class HMBinarySensor(homematic.HMDevice, BinarySensorDevice):
         return self._sensor_class
 
     @property
-    def state_attributes(self):
-        """Return device specific state attributes."""
-        attr = {}
+    def device_state_attributes(self):
+        """Return the device specific state attributes."""
+        attributes = {"sensor_class" : self.sensor_class,
+                      "rssi" : self._rssi,
+                      "sabotage" : self._sabotage}
+        if self._battery:
+            attributes['battery'] = self._battery
 
-        if self.sensor_class is not None:
-            attr['sensor_class'] = self.sensor_class
-
-        return attr
+        return attributes
 
     def connect_to_homematic(self):
         """Configuration specific to device after connection with pyhomematic is established"""
@@ -69,6 +73,13 @@ class HMBinarySensor(homematic.HMDevice, BinarySensorDevice):
                     self._battery = 1.5
                 else:
                     self._battery = 4.6
+            elif attribute == 'RSSI_DEVICE':
+                self._rssi = value
+            elif attribute == 'ERROR':
+                if value == 7:
+                    self._sabotage = True
+                else:
+                    self._sabotage = False
             elif attribute == 'UNREACH':
                 self._is_available = not bool(value)
             else:
@@ -81,12 +92,15 @@ class HMBinarySensor(homematic.HMDevice, BinarySensorDevice):
             self._sensor_class = 'opening'
             if self._is_available:
                 self._state = self._hmdevice.state
-        if type(self._hmdevice).__name__ == "HMRemote":
+        elif type(self._hmdevice).__name__ == "HMRemote":
             self._sensor_class = 'remote button'
             self._channel = self._config.get('channel', None)
             if not self._channel:
-                _LOGGER.error("No channel defined for '%s'" %self._address)
+                _LOGGER.error("No channel defined for '%s'" % self._address)
                 self._is_available = False
+        else:
+            self._sensor_class = None
+            self._state = None
         if self._is_available:
             self._hmdevice.setEventCallback(event_received)
             self.update_ha_state()
