@@ -84,7 +84,6 @@ def setup(hass, config):
 
     def system_callback_handler(src, *args):
         
-        print(src, args)
         if src == 'newDevices':
             (interface_id, dev_descriptions) = args
             key_dict = {}
@@ -109,7 +108,7 @@ def setup(hass, config):
                     ('sensor', get_sensors, DISCOVER_SENSORS),
                     ('thermostat', get_thermostats, DISCOVER_THERMOSTATS),
                     ):
-                    # Get alle devices of a specific type
+                    # Get all devices of a specific type
                     found_devices = func_get_devices(devices_not_created)
                     
                     # Devices of this type are found they are setup in HA and a event is fired
@@ -131,7 +130,12 @@ def setup(hass, config):
                         homematic_devices[dev].connect_to_homematic()
     
     # Create server thread
-    HOMEMATIC.create_server(local=local_ip, localport=local_port, remote=remote_ip, remoteport=remote_port, systemcallback=system_callback_handler) 
+    HOMEMATIC.create_server(local=local_ip,
+                            localport=local_port,
+                            remote=remote_ip,
+                            remoteport=remote_port,
+                            systemcallback=system_callback_handler,
+                            interface_id='homeassistant')
     HOMEMATIC.start() # Start server thread, connect to homegear, initialize to receive events
     # while not pyhomematic.devices or pyhomematic._server.working:
     #     time.sleep(1)
