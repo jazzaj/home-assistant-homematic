@@ -1,0 +1,2 @@
+Rollershutter:
+  - Service to drive to a specific position
