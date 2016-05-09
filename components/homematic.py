@@ -95,7 +95,8 @@ def setup(hass, config):
             devices_not_created = []
             for dev in key_dict: # for dev in list(key_dict.keys()):
                 if dev in homematic_devices:
-                    homematic_devices[dev].connect_to_homematic()
+                    for channel in homematic_devices[dev]:
+                        channel.connect_to_homematic()
                 else:
                     devices_not_created.append(dev)
             
@@ -195,7 +196,9 @@ def setup_hmdevice_entity_helper(HMDeviceType, config, add_callback_devices):
         _LOGGER.error("Error setting up Homematic Device '%s': 'address' missing in configuration." % address)
         return False
     new_device = HMDeviceType(config)
-    homematic_devices[address] = new_device
+    if not address in homematic_devices:
+        homematic_devices[address] = []
+    homematic_devices[address].append(new_device)
     add_callback_devices([new_device])        
     return True
 
