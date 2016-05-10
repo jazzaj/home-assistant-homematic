@@ -85,6 +85,7 @@ class HMRollershutter(homematic.HMDevice, RollershutterDevice):
 
         super().connect_to_homematic()
         if self._is_available:
+            _LOGGER.debug("Setting up rollershutter %s" % self._hmdevice._ADDRESS)
             self._hmdevice.setEventCallback(event_received)
             self._level = self._hmdevice.level
             self.update_ha_state()

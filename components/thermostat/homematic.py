@@ -17,7 +17,7 @@ DEPENDENCIES = ['homematic']
 import homeassistant.components.homematic as homematic
 from homeassistant.components.thermostat import ThermostatDevice
 from homeassistant.helpers.temperature import convert
-from homeassistant.const import TEMP_CELSIUS
+from homeassistant.const import TEMP_CELSIUS, STATE_UNKNOWN
 
 PROPERTY_VALVE_STATE = 'VALVE_STATE'
 PROPERTY_CONTROL_MODE = 'CONTROL_MODE'
@@ -44,7 +44,8 @@ class HMThermostat(homematic.HMDevice, ThermostatDevice):
 
     def __init__(self, config):
         super().__init__(config)
-        self._battery = None
+        self._battery = STATE_UNKNOWN
+        self._rssi = STATE_UNKNOWN
 
     @property
     def unit_of_measurement(self):
@@ -88,11 +89,13 @@ class HMThermostat(homematic.HMDevice, ThermostatDevice):
         if self._is_connected:
             return {"valve": self._valve,
                     "battery": self._battery,
-                    "mode": self._mode}
+                    "mode": self._mode,
+                    "rssi": self._rssi}
         else:
-            return {"valve": None,
-                    "battery": None,
-                    "mode": None}
+            return {"valve": STATE_UNKNOWN,
+                    "battery": STATE_UNKNOWN,
+                    "mode": STATE_UNKNOWN,
+                    "rssi": STATE_UNKNOWN}
 
     @property
     def min_temp(self):
@@ -116,6 +119,8 @@ class HMThermostat(homematic.HMDevice, ThermostatDevice):
                 self._valve = float(value)
             elif attribute == 'CONTROL_MODE':
                 self._mode = value
+            elif attribute == 'RSSI_DEVICE':
+                self._rssi = value
             elif attribute == 'BATTERY_STATE':
                 if isinstance(value, float):
                     self._battery = value
@@ -132,6 +137,7 @@ class HMThermostat(homematic.HMDevice, ThermostatDevice):
 
         super().connect_to_homematic()
         if self._is_available:
+            _LOGGER.debug("Setting up thermostat %s" % self._hmdevice._ADDRESS)
             try:
                 self._hmdevice.setEventCallback(event_received)
                 self._current_temperature = self._hmdevice.actual_temperature
