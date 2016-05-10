@@ -97,10 +97,12 @@ class HMBinarySensor(homematic.HMDevice, BinarySensorDevice):
         super().connect_to_homematic()
 
         if type(self._hmdevice).__name__ == "HMDoorContact":
+            _LOGGER.debug("Setting up HMDoorContact %s" % self._hmdevice._ADDRESS)
             self._sensor_class = 'opening'
             if self._is_available:
                 self._state = self._hmdevice.state
         elif type(self._hmdevice).__name__ == "HMRemote":
+            _LOGGER.debug("Setting up HMRemote %s" % self._hmdevice._ADDRESS)
             self._sensor_class = 'remote button'
             self._button = self._config.get('button', None)
             if not self._button:
