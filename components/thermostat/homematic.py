@@ -137,6 +137,7 @@ class HMThermostat(homematic.HMDevice, ThermostatDevice):
 
         super().connect_to_homematic()
         if self._is_available:
+            _LOGGER.debug("Setting up thermostat %s" % self._hmdevice._ADDRESS)
             try:
                 self._hmdevice.setEventCallback(event_received)
                 self._current_temperature = self._hmdevice.actual_temperature
