@@ -84,6 +84,7 @@ class HMLight(homematic.HMDevice, Light):
         else:
             self._dimmer = False 
         if self._is_available:
+            _LOGGER.debug("Setting up light device %s" % self._hmdevice._ADDRESS)
             self._hmdevice.setEventCallback(event_received)
             if self._dimmer:
                 self._level = self._hmdevice.level
