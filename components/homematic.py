@@ -93,11 +93,14 @@ def setup(hass, config):
             # Connect devices already created in HA to pyhomematic and add remaining devices to list
             devices_not_created = []
             for dev in key_dict: # for dev in list(key_dict.keys()):
-                if dev in homematic_devices:
-                    for channel in homematic_devices[dev]:
-                        channel.connect_to_homematic()
-                else:
-                    devices_not_created.append(dev)
+                try:
+                    if dev in homematic_devices:
+                        for channel in homematic_devices[dev]:
+                            channel.connect_to_homematic()
+                    else:
+                        devices_not_created.append(dev)
+                except Exception as err:
+                    _LOGGER.error("Failed to setup device %s: %s" % (str(dev), str(err)))
             
             # If configuration allows auto detection of devices all devices not configured are added.         
             if autodetect and devices_not_created:
