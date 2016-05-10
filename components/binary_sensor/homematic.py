@@ -73,6 +73,14 @@ class HMBinarySensor(homematic.HMDevice, BinarySensorDevice):
                     self._battery = 1.5
                 else:
                     self._battery = 4.6
+            elif attribute == 'PRESS_LONG_RELEASE':
+                if int(device.split(':')[1]) == int(self._button):
+                        self._state = 0
+            elif attribute == 'PRESS_SHORT' or attribute == 'PRESS_LONG':
+                if int(device.split(':')[1]) == int(self._button):
+                    self._state = 1
+                    self.update_ha_state()
+                    self._state = 0
             elif attribute == 'RSSI_DEVICE':
                 self._rssi = value
             elif attribute == 'ERROR':
@@ -94,9 +102,9 @@ class HMBinarySensor(homematic.HMDevice, BinarySensorDevice):
                 self._state = self._hmdevice.state
         elif type(self._hmdevice).__name__ == "HMRemote":
             self._sensor_class = 'remote button'
-            self._channel = self._config.get('channel', None)
-            if not self._channel:
-                _LOGGER.error("No channel defined for '%s'" % self._address)
+            self._button = self._config.get('button', None)
+            if not self._button:
+                _LOGGER.error("No button defined for '%s'" %self._address)
                 self._is_available = False
         else:
             self._sensor_class = None

@@ -12,7 +12,7 @@ rollershutter:
 
 """
 from homeassistant.const import (STATE_OPEN, STATE_CLOSED, STATE_UNKNOWN)
-from homeassistant.components.rollershutter import RollershutterDevice
+from homeassistant.components.rollershutter import RollershutterDevice, ATTR_POSITION
 import homeassistant.components.homematic as homematic
 
 
@@ -38,11 +38,13 @@ class HMRollershutter(homematic.HMDevice, RollershutterDevice):
         else:
             return None
         
-    def set_position(self, position):
+    def position(self, **kwargs):
         """Move the roller shutter to a defined position between 0 (closed) and 100 (fully open)"""
         if self._is_connected:
-            position = min(100, max(0, position))
-            self._hmdevice.level = (100 - position) / 100.0
+            if ATTR_POSITION in kwargs:
+                position = float(kwargs[ATTR_POSITION])
+                position = min(100, max(0, position))
+                self._hmdevice.level = (100 - position) / 100.0
 
     @property
     def state(self):
