@@ -90,10 +90,3 @@ class HMRollershutter(homematic.HMDevice, RollershutterDevice):
             self._hmdevice.setEventCallback(event_received)
             self._level = self._hmdevice.level
             self.update_ha_state()
-    
-    # TODO: For testing purposes only. To be deleted...
-    # @property
-    # def state_attributes(self):
-    #     data = super(HMRollershutter, self).state_attributes
-    #     data['Test'] = 50
-    #     return data
