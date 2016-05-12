@@ -25,15 +25,16 @@ PROPERTY_CONTROL_MODE = 'CONTROL_MODE'
 HMCOMP = 0
 MAXCOMP = 1
 VARIANTS = {
-    "HM-CC-RT-DN" : HMCOMP,
-    "HM-CC-RT-DN-BoM" : HMCOMP,
-    "BC-RT-TRX-CyG" : MAXCOMP,
-    "BC-RT-TRX-CyG-2" : MAXCOMP,
-    "BC-RT-TRX-CyG-3" : MAXCOMP,
-    "BC-RT-TRX-CyG-4" : MAXCOMP
+    "HM-CC-RT-DN": HMCOMP,
+    "HM-CC-RT-DN-BoM": HMCOMP,
+    "BC-RT-TRX-CyG": MAXCOMP,
+    "BC-RT-TRX-CyG-2": MAXCOMP,
+    "BC-RT-TRX-CyG-3": MAXCOMP,
+    "BC-RT-TRX-CyG-4": MAXCOMP
 }
 
 _LOGGER = logging.getLogger(__name__)
+
 
 def setup_platform(hass, config, add_callback_devices, discovery_info=None):
     return homematic.setup_hmdevice_entity_helper(HMThermostat, config, add_callback_devices)

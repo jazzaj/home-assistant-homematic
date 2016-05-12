@@ -21,8 +21,10 @@ _LOGGER = logging.getLogger(__name__)
 # List of component names (string) your component depends upon.
 DEPENDENCIES = ['homematic']
 
+
 def setup_platform(hass, config, add_callback_devices, discovery_info=None):
     return homematic.setup_hmdevice_entity_helper(HMLight, config, add_callback_devices)
+
 
 class HMLight(homematic.HMDevice, Light):
     """Represents an Homematic Light in Home Assistant."""

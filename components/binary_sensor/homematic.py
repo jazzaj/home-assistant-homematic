@@ -28,6 +28,7 @@ SENSOR_TYPES = {
     "loudness": "sound"
 }
 
+
 def setup_platform(hass, config, add_callback_devices, discovery_info=None):
     return homematic.setup_hmdevice_entity_helper(HMBinarySensor, config, add_callback_devices)
 

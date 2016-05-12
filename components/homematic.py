@@ -23,8 +23,8 @@ import homeassistant.bootstrap
 from collections import OrderedDict
 # import time
     
-#REQUIREMENTS = ['pyhomematic']
-#DEPENDENCIES = ['pyhomematic']
+# REQUIREMENTS = ['pyhomematic']
+# DEPENDENCIES = ['pyhomematic']
 
 import pyhomematic
 homematic_devices = {}
@@ -52,15 +52,16 @@ ATTR_DISCOVER_DEVICES = "devices"
 ATTR_DISCOVER_CONFIG = "config"
 
 HM_DEVICE_TYPES = {
-   DISCOVER_SWITCHES : ['HMSwitch'],
+   DISCOVER_SWITCHES: ['HMSwitch'],
    DISCOVER_LIGHTS: ['HMDimmer'],
-   DISCOVER_SENSORS : ['HMCcu'],
-   DISCOVER_THERMOSTATS : ['HMThermostat'],
-   DISCOVER_BINARY_SENSORS : ['HMRemote', 'HMDoorContact'],
-   DISCOVER_ROLLERSHUTTER : ['HMRollerShutter']
+   DISCOVER_SENSORS: ['HMCcu'],
+   DISCOVER_THERMOSTATS: ['HMThermostat'],
+   DISCOVER_BINARY_SENSORS: ['HMRemote', 'HMDoorContact'],
+   DISCOVER_ROLLERSHUTTER: ['HMRollerShutter']
 }
 
 _LOGGER = logging.getLogger(__name__)
+
 
 # pylint: disable=unused-argument
 def setup(hass, config):
@@ -104,30 +105,29 @@ def setup(hass, config):
             # If configuration allows auto detection of devices all devices not configured are added.         
             if autodetect and devices_not_created:
                 for component_name, func_get_devices, discovery_type in (
-                    ('switch', get_switches, DISCOVER_SWITCHES),
-                    ('light', get_lights, DISCOVER_LIGHTS),
-                    ('rollershutter', get_rollershutters, DISCOVER_ROLLERSHUTTER),
-                    ('binary_sensor', get_binary_sensors, DISCOVER_BINARY_SENSORS),
-                    ('sensor', get_sensors, DISCOVER_SENSORS),
-                    ('thermostat', get_thermostats, DISCOVER_THERMOSTATS),
-                    ):
+                        ('switch', get_switches, DISCOVER_SWITCHES),
+                        ('light', get_lights, DISCOVER_LIGHTS),
+                        ('rollershutter', get_rollershutters, DISCOVER_ROLLERSHUTTER),
+                        ('binary_sensor', get_binary_sensors, DISCOVER_BINARY_SENSORS),
+                        ('sensor', get_sensors, DISCOVER_SENSORS),
+                        ('thermostat', get_thermostats, DISCOVER_THERMOSTATS)):
                     # Get all devices of a specific type
                     found_devices = func_get_devices(devices_not_created)
                     
                     # Devices of this type are found they are setup in HA and a event is fired
                     if found_devices:
                         component = get_component(component_name)
-                        config ={component.DOMAIN : found_devices}
+                        config = {component.DOMAIN: found_devices}
             
                         # Ensure component is loaded
                         homeassistant.bootstrap.setup_component(hass, component.DOMAIN, config)
             
                         # Fire discovery event
                         hass.bus.fire(EVENT_PLATFORM_DISCOVERED, {
-                            ATTR_SERVICE: discovery_type,
-                            ATTR_DISCOVERED: {ATTR_DISCOVER_DEVICES: found_devices, 
-                            ATTR_DISCOVER_CONFIG: ''}
-                        })
+                                      ATTR_SERVICE: discovery_type,
+                                      ATTR_DISCOVERED: {ATTR_DISCOVER_DEVICES: found_devices,
+                                                        ATTR_DISCOVER_CONFIG: ''}}
+                                      )
                 for dev in devices_not_created:
                     if dev in homematic_devices:
                         homematic_devices[dev].connect_to_homematic()
@@ -142,7 +142,7 @@ def setup(hass, config):
     HOMEMATIC.start() # Start server thread, connect to homegear, initialize to receive events
     # while not pyhomematic.devices or pyhomematic._server.working:
     #     time.sleep(1)
-    #print('Homematic Devices found: ', len(HOMEMATIC.devices))
+    # print('Homematic Devices found: ', len(HOMEMATIC.devices))
     hass.bus.listen_once(EVENT_HOMEASSISTANT_STOP, HOMEMATIC.stop) # Stops server when Homeassistant is shuting down
     hass.config.components.append(DOMAIN)
     
@@ -152,27 +152,27 @@ def setup(hass, config):
     return True
 
 
-def get_switches(keys = None):
+def get_switches(keys=None):
     return get_devices(HM_DEVICE_TYPES[DISCOVER_SWITCHES], keys)
 
 
-def get_lights(keys = None):
+def get_lights(keys=None):
     return get_devices(HM_DEVICE_TYPES[DISCOVER_LIGHTS], keys)
 
 
-def get_rollershutters(keys = None):
+def get_rollershutters(keys=None):
     return get_devices(HM_DEVICE_TYPES[DISCOVER_ROLLERSHUTTER], keys)
 
 
-def get_binary_sensors(keys = None):
+def get_binary_sensors(keys=None):
     return get_devices(HM_DEVICE_TYPES[DISCOVER_BINARY_SENSORS], keys)
 
 
-def get_sensors(keys = None):
+def get_sensors(keys=None):
     return get_devices(HM_DEVICE_TYPES[DISCOVER_SENSORS], keys)
 
 
-def get_thermostats(keys = None):
+def get_thermostats(keys=None):
     return get_devices(HM_DEVICE_TYPES[DISCOVER_THERMOSTATS], keys)
 
 
@@ -191,6 +191,7 @@ def get_devices(device_types, keys):
             device_arr.append(ordered_device_dict)
     return device_arr
 
+
 def setup_hmdevice_entity_helper(HMDeviceType, config, add_callback_devices):
     global devices
     
@@ -202,13 +203,14 @@ def setup_hmdevice_entity_helper(HMDeviceType, config, add_callback_devices):
         _LOGGER.error("Error setting up Homematic Device '%s': 'address' missing in configuration." % address)
         return False
     new_device = HMDeviceType(config)
-    if not address in homematic_devices:
+    if address not in homematic_devices:
         homematic_devices[address] = []
     homematic_devices[address].append(new_device)
     add_callback_devices([new_device])        
     return True
 
-class HMDevice():
+
+class HMDevice:
     def __init__(self, config):
         """Initialize generic HM device."""
         self._config = config
@@ -249,4 +251,3 @@ class HMDevice():
     def available(self):
         """Return True if light is available."""
         return self._is_available
-    
