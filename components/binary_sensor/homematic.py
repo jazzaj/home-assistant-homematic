@@ -28,6 +28,9 @@ SENSOR_TYPES = {
     "loudness": "sound"
 }
 
+HMSHUTTERCONTACTS = ["HM-Sec-SC", "HM-Sec-SC-2", "ZEL STG RM FFK"]
+HMREMOTES = ["HM-RC-8"]
+
 
 def setup_platform(hass, config, add_callback_devices, discovery_info=None):
     return homematic.setup_hmdevice_entity_helper(HMBinarySensor, config, add_callback_devices)
@@ -97,12 +100,14 @@ class HMBinarySensor(homematic.HMDevice, BinarySensorDevice):
 
         super().connect_to_homematic()
 
-        if type(self._hmdevice).__name__ == "HMDoorContact":
-            _LOGGER.debug("Setting up HMDoorContact %s" % self._hmdevice._ADDRESS)
+        if (not self._hmdevice._PARENT and self._hmdevice._TYPE in HMSHUTTERCONTACTS) \
+                or (self._hmdevice._PARENT and self._hmdevice._PARENT_TYPE in HMSHUTTERCONTACTS):
+            _LOGGER.debug("Setting up HMShutterContact %s" % self._hmdevice._ADDRESS)
             self._sensor_class = 'opening'
             if self._is_available:
                 self._state = self._hmdevice.state
-        elif type(self._hmdevice).__name__ == "HMRemote":
+        elif (not self._hmdevice._PARENT and self._hmdevice._TYPE in HMREMOTES) \
+                or (self._hmdevice._PARENT and self._hmdevice._PARENT_TYPE in HMREMOTES):
             _LOGGER.debug("Setting up HMRemote %s" % self._hmdevice._ADDRESS)
             self._sensor_class = 'remote button'
             self._button = self._config.get('button', None)
