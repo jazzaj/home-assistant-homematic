@@ -41,7 +41,7 @@ class HMSensor(homematic.HMDevice, Entity):
         """Return the state of the sensor."""
         if self.sensor_class == "handle":
             """ (0=closed, 1=tilted, 2=open) """
-            HANDLE_STATE = {0 : "closed", 1 : "tilted", 2 : "open"} 
+            HANDLE_STATE = {0 : "Closed", 1 : "Tilted", 2 : "Open"} 
             return HANDLE_STATE.get(self._state, None) 
         
         return self._state
